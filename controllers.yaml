@@ -2,29 +2,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: sec-slack-controller
+  name: metademo-controller
+  namespace: controllers
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: sec-slack-controller
+      app: metademo-controller
   template:
     metadata:
       labels:
-        app: sec-slack-controller
+        app: metademo-controller
     spec:
       containers:
       - name: controller
-        image: metadem:0.0.20
+        image: metadem:0.0.21
 
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: sec-slack-controller
+  name: metademo-controller
+  namespace: controllers
 spec:
   selector:
-    app: sec-slack-controller
+    app: metademo-controller
   ports:
   - port: 8080
