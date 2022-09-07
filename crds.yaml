@@ -1,0 +1,83 @@
+---
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: idregs.security.punasusi.com
+spec:
+  group: security.punasusi.com
+  names:
+    kind: Identreg
+    plural: idregs
+    singular: idreg
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              identname:
+                type: string
+              uuid:
+                type: string
+    subresources:
+     status: {}
+
+---
+
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: idents.security.punasusi.com
+spec:
+  group: security.punasusi.com
+  names:
+    kind: Identity
+    plural: idents
+    singular: ident
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              api_delegated_apps:
+                type: string
+              api_suffix:
+                type: string
+              app_kind:
+                type: string
+              appname:
+                type: string
+              ardfullname:
+                type: string
+              ardid:
+                type: integer
+              key_vault_id:
+                type: string
+              env:
+                type: string
+              solution_id:
+                type: string
+              data:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  Id:
+                    type: string
+    subresources:
+     status: {}
+

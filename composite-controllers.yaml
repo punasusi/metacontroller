@@ -1,0 +1,21 @@
+
+---
+
+apiVersion: metacontroller.k8s.io/v1alpha1
+kind: CompositeController
+metadata:
+  name: secslack
+spec:
+  generateSelector: true
+  parentResource:
+    apiVersion: security.punasusi.com/v1alpha1
+    resource: idents
+  childResources:
+  - apiVersion: security.punasusi.com/v1alpha1
+    resource: idregs
+    updateStrategy:
+      method: InPlace
+  hooks:
+    sync:
+      webhook:
+        url: http://sec-slack-controller.controllers:8080/sync

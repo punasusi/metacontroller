@@ -1,0 +1,14 @@
+apiVersion: security.punasusi.com/v1alpha1
+kind: Identity
+metadata:
+  name: andy-app-id
+spec:
+  api_delegated_apps: blank
+  api_suffix: almexperience
+  app_kind: API
+  appname: almexperience-backend
+  ardfullname: alm
+  ardid: 9999
+  key_vault_id: something
+  env: dv
+  solution_id: CCOE

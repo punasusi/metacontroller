@@ -1,0 +1,177 @@
+{
+	"controller": {
+		"kind": "CompositeController",
+		"apiVersion": "metacontroller.k8s.io/v1alpha1",
+		"metadata": {
+			"name": "secslack",
+			"uid": "5e20e9c9-86f3-4738-8b3f-5c6e93fcdf5e",
+			"resourceVersion": "10527",
+			"generation": 1,
+			"creationTimestamp": "2022-09-01T19:43:20Z",
+			"annotations": {
+				"kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"CompositeController\",\"metadata\":{\"annotations\":{},\"name\":\"secslack\"},\"spec\":{\"generateSelector\":true,\"hooks\":{\"sync\":{\"webhook\":{\"url\":\"http://sec-slack-controller.controllers:8080/slack\"}}},\"parentResource\":{\"apiVersion\":\"security.punasusi.com/v1alpha1\",\"resource\":\"idents\"}}}\n"
+			},
+			"managedFields": [
+				{
+					"manager": "kubectl-client-side-apply",
+					"operation": "Update",
+					"apiVersion": "metacontroller.k8s.io/v1alpha1",
+					"time": "2022-09-01T19:43:20Z",
+					"fieldsType": "FieldsV1",
+					"fieldsV1": {
+						"f:metadata": {
+							"f:annotations": {
+								".": {
+
+								},
+								"f:kubectl.kubernetes.io/last-applied-configuration": {
+
+								}
+							}
+						},
+						"f:spec": {
+							".": {
+
+							},
+							"f:generateSelector": {
+
+							},
+							"f:hooks": {
+								".": {
+
+								},
+								"f:sync": {
+									".": {
+
+									},
+									"f:webhook": {
+										".": {
+
+										},
+										"f:url": {
+
+										}
+									}
+								}
+							},
+							"f:parentResource": {
+								".": {
+
+								},
+								"f:apiVersion": {
+
+								},
+								"f:resource": {
+
+								}
+							}
+						}
+					}
+				}
+			]
+		},
+		"spec": {
+			"parentResource": {
+				"apiVersion": "security.punasusi.com/v1alpha1",
+				"resource": "idents"
+			},
+			"hooks": {
+				"sync": {
+					"webhook": {
+						"url": "http://sec-slack-controller.controllers:8080/slack"
+					}
+				}
+			},
+			"generateSelector": true
+		},
+		"status": {
+
+		}
+	},
+	"parent": {
+		"apiVersion": "security.punasusi.com/v1alpha1",
+		"kind": "Identity",
+		"metadata": {
+			"annotations": {
+				"kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"security.punasusi.com/v1alpha1\",\"kind\":\"Identity\",\"metadata\":{\"annotations\":{},\"name\":\"andy-app-id\",\"namespace\":\"default\"},\"spec\":{\"api_delegated_apps\":\"blank\",\"api_suffix\":\"almexperience\",\"app_kind\":\"API\",\"appname\":\"almexperience-backent\",\"ardfullname\":\"alm\",\"ardid\":9999,\"env\":\"dv\",\"key_vault_id\":\"something\",\"solution_id\":\"CCOE\"}}\n"
+			},
+			"creationTimestamp": "2022-09-02T08:57:27Z",
+			"generation": 1,
+			"managedFields": [
+				{
+					"apiVersion": "security.punasusi.com/v1alpha1",
+					"fieldsType": "FieldsV1",
+					"fieldsV1": {
+						"f:metadata": {
+							"f:annotations": {
+								".": {
+
+								},
+								"f:kubectl.kubernetes.io/last-applied-configuration": {
+
+								}
+							}
+						},
+						"f:spec": {
+							".": {
+
+							},
+							"f:api_delegated_apps": {
+
+							},
+							"f:api_suffix": {
+
+							},
+							"f:app_kind": {
+
+							},
+							"f:appname": {
+
+							},
+							"f:ardfullname": {
+
+							},
+							"f:ardid": {
+
+							},
+							"f:env": {
+
+							},
+							"f:key_vault_id": {
+
+							},
+							"f:solution_id": {
+
+							}
+						}
+					},
+					"manager": "kubectl-client-side-apply",
+					"operation": "Update",
+					"time": "2022-09-02T08:57:27Z"
+				}
+			],
+			"name": "andy-app-id",
+			"namespace": "default",
+			"resourceVersion": "21093",
+			"uid": "e5c6f54e-a55b-427e-a4f2-b4c3cb509ab4"
+		},
+		"spec": {
+			"api_delegated_apps": "blank",
+			"api_suffix": "almexperience",
+			"app_kind": "API",
+			"appname": "andy-test",
+			"ardfullname": "alm",
+			"ardid": 9999,
+			"env": "dv",
+			"key_vault_id": "something",
+			"solution_id": "CCOE"
+		}
+	},
+	"children": {
+
+	},
+	"related": {
+
+	},
+	"finalizing": true
+}
