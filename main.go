@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,8 +32,15 @@ func loglevel() log.Level {
 }
 
 func main() {
+	// load .env file
+	err := godotenv.Load(".env")
+
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
 	log.SetLevel(loglevel())
 	gin.DefaultWriter = log.New().Out
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.POST("/sync", syncHandler)
 	port := os.Getenv("PORT")
