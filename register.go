@@ -43,12 +43,36 @@ func RegisterApp(app AppReg) (id uuid.UUID) {
 	}
 	log.Info("get resources group:", *resourceGroup.ID)
 
+	app = createAzureADApp(ctx, conn, app)
+	app = createAzureADAppPass(ctx, conn, app)
+	app = createAzureADAppSP(ctx, conn, app)
+	app = createAzureADgroups(ctx, conn, app)
+	app = createAzureKV(ctx, conn, app)
 	log.Debug(string(app.Appname))
 	log.Debug(string(app.APIVersion))
 	log.Debug(string(app.Env))
 	return uuid.New()
 }
-
+func createAzureADApp(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
+	//TODO
+	return app
+}
+func createAzureADAppPass(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
+	//TODO
+	return app
+}
+func createAzureADAppSP(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
+	//TODO
+	return app
+}
+func createAzureADgroups(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
+	//TODO
+	return app
+}
+func createAzureKV(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
+	//TODO
+	return app
+}
 func connectionAzure() (azcore.TokenCredential, error) {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
 	if err != nil {
