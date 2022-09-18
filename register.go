@@ -1,107 +1,82 @@
 package main
 
 import (
-	"context"
-	"os"
+	"errors"
+	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
-	"github.com/google/uuid"
+	a "github.com/microsoft/kiota-authentication-azure-go"
+	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	log "github.com/sirupsen/logrus"
 )
 
-var (
-	subscriptionID    string
-	location          string
-	resourceGroupName string
-)
-
-// TODO add here
-func RegisterApp(app AppReg) (id uuid.UUID) {
-	location = os.Getenv("RESOURCE_LOCATION")
-	resourceGroupName = os.Getenv("RESOURCE_GROUP_NAME")
-	subscriptionID = os.Getenv("SUBSCRIPTION_ID")
-	if len(subscriptionID) == 0 {
-		log.Fatal("AZURE_SUBSCRIPTION_ID is not set.")
-	}
-	conn, err := connectionAzure()
+func RegisterApp(app App) (App, error) {
+	client, err := createClient()
+	failedApp := &App{}
 	if err != nil {
-		log.Fatalf("cannot connect to Azure:%+v", err)
+		fmt.Printf("Error creating credentials: %v\n", err)
+		return *failedApp, errors.New("failed to create client")
 	}
-	ctx := context.Background()
 
-	exits, err := checkExistenceResourceGroup(ctx, conn)
+	app, err = createAzureADApp(client, app)
 	if err != nil {
-		log.Fatal(err)
+		return app, err
 	}
-	log.Info("resources group exist:", exits)
+	app, _ = createAzureADAppPass(client, app)
+	app, _ = createAzureADAppSP(client, app)
+	app, _ = createAzureADgroups(client, app)
+	app, _ = createAzureKV(client, app)
 
-	resourceGroup, err := getResourceGroup(ctx, conn)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Info("get resources group:", *resourceGroup.ID)
+	log.Debug(string(app.AppName))
+	return app, nil
+}
 
-	app = createAzureADApp(ctx, conn, app)
-	app = createAzureADAppPass(ctx, conn, app)
-	app = createAzureADAppSP(ctx, conn, app)
-	app = createAzureADgroups(ctx, conn, app)
-	app = createAzureKV(ctx, conn, app)
-	log.Debug(string(app.Appname))
-	log.Debug(string(app.APIVersion))
-	log.Debug(string(app.Env))
-	return uuid.New()
-}
-func createAzureADApp(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
-	//TODO
-	return app
-}
-func createAzureADAppPass(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
-	//TODO
-	return app
-}
-func createAzureADAppSP(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
-	//TODO
-	return app
-}
-func createAzureADgroups(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
-	//TODO
-	return app
-}
-func createAzureKV(ctx context.Context, cred azcore.TokenCredential, app AppReg) AppReg {
-	//TODO
-	return app
-}
-func connectionAzure() (azcore.TokenCredential, error) {
+func createClient() (msgraphsdk.GraphServiceClient, error) {
+
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
+	failedauth, _ := a.NewAzureIdentityAuthenticationProvider(cred)
+	failedadapter, _ := msgraphsdk.NewGraphRequestAdapter(failedauth)
+	failed := msgraphsdk.NewGraphServiceClient(failedadapter)
 	if err != nil {
-		return nil, err
+		message := "error creating credentials"
+		return *failed, errors.New(message)
 	}
-	return cred, nil
+
+	auth, err := a.NewAzureIdentityAuthenticationProviderWithScopes(cred, []string{"https://graph.microsoft.com/.default"})
+	if err != nil {
+		message := "error authentication provider"
+		return *failed, errors.New(message)
+	}
+	adapter, err := msgraphsdk.NewGraphRequestAdapter(auth)
+	if err != nil {
+		message := "error creating adapter"
+		return *failed, errors.New(message)
+	}
+	client := msgraphsdk.NewGraphServiceClient(adapter)
+	return *client, nil
 }
 
-func checkExistenceResourceGroup(ctx context.Context, cred azcore.TokenCredential) (bool, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, nil)
+func createAzureADApp(client msgraphsdk.GraphServiceClient, app App) (App, error) {
+	newApp, err := CreateAzureADApp(client, app)
 	if err != nil {
-		return false, err
+		log.Error(err)
+		return app, errors.New("error creating the app")
 	}
-
-	boolResp, err := resourceGroupClient.CheckExistence(ctx, resourceGroupName, nil)
-	if err != nil {
-		return false, err
-	}
-	return boolResp.Success, nil
+	return newApp, nil
 }
-func getResourceGroup(ctx context.Context, cred azcore.TokenCredential) (*armresources.ResourceGroup, error) {
-	resourceGroupClient, err := armresources.NewResourceGroupsClient(subscriptionID, cred, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resourceGroupResp, err := resourceGroupClient.Get(ctx, resourceGroupName, nil)
-	if err != nil {
-		return nil, err
-	}
-	return &resourceGroupResp.ResourceGroup, nil
+func createAzureADAppPass(client msgraphsdk.GraphServiceClient, app App) (App, error) {
+	//TODO
+	return app, nil
+}
+func createAzureADAppSP(client msgraphsdk.GraphServiceClient, app App) (App, error) {
+	//TODO
+	return app, nil
+}
+func createAzureADgroups(client msgraphsdk.GraphServiceClient, app App) (App, error) {
+	//TODO
+	return app, nil
+}
+func createAzureKV(client msgraphsdk.GraphServiceClient, app App) (App, error) {
+	//TODO
+	return app, nil
 }

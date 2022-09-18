@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
@@ -33,11 +34,11 @@ func loglevel() log.Level {
 
 func main() {
 	// load .env file
-	err := godotenv.Load(".env")
+	godotenv.Load(".env")
 
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file")
+	// }
 	log.SetLevel(loglevel())
 	gin.DefaultWriter = log.New().Out
 	gin.SetMode(gin.ReleaseMode)
@@ -50,10 +51,11 @@ func main() {
 	r.Run(fmt.Sprintf(":%s", port))
 }
 
+// TODO add finalizer to delete
 func syncHandler(c *gin.Context) {
 	response := &SyncResponse{}
 	body, err := io.ReadAll(c.Request.Body)
-	log.Debug(string(body))
+	log.Trace(string(body))
 	if err != nil {
 		log.Error("JSON body could not be retrieved")
 		c.String(http.StatusBadRequest, "JSON body could not be retrieved")
@@ -66,28 +68,37 @@ func syncHandler(c *gin.Context) {
 		c.String(http.StatusBadRequest, "JSON could not be unmarshalled")
 		return
 	}
-	log.Info(request.Parent.APIVersion)
 
 	identVersion := request.Parent.ObjectMeta.ResourceVersion
-	log.Trace(request.Parent.Spec.APIDelegatedApps)
 	for _, reg := range request.Children.ResourceVersion {
 		response.Status.Replicas++
 		response.Status.Succeeded++
 		log.Trace(reg)
 	}
 
-	app := &AppReg{}
-	// TODO add here
-	app.APIVersion = request.Parent.APIVersion
-	app.Appname = request.Parent.Spec.Appname
-	app.Env = request.Parent.Spec.Env
-	app.Final = request.Finalize
+	app := &App{}
+	app.RequiredResourceAccess = append(app.RequiredResourceAccess, request.Parent.Spec.APIDelegatedApps)
+	app.ApiSuffix = request.Parent.Spec.APISuffix
 	app.Kind = request.Parent.Kind
-	app.Version = identVersion
+	app.ArdFullName = request.Parent.Spec.Appname
+	app.Ardid = int32(request.Parent.Spec.Ardid)
+	app.Env = request.Parent.Spec.Env
+	app.KeyVaultID = request.Parent.Spec.KeyVaultID
+	app.SolutionID = request.Parent.Spec.SolutionID
+	app.AppRoles = append(app.AppRoles, request.Parent.Spec.AppRoles)
+	app.AppTags = append(app.AppTags, request.Parent.Spec.AppTags)
+	app.Final = request.Finalize
 
-	log.Trace(app)
-	appuuid := RegisterApp(*app)
-	regspec := &RegistrationSpec{request.Parent.Spec.Appname, appuuid.String()}
+	app.Version = identVersion
+	appdump := spew.Sdump(app)
+	log.Trace(appdump)
+	appuuid, err := RegisterApp(*app)
+	if err != nil {
+		log.Error(err)
+		c.JSON(http.StatusInternalServerError, err)
+		return
+	}
+	regspec := &RegistrationSpec{request.Parent.Spec.Appname, appuuid.ArdFullName}
 	regname := &RegistrationMetadata{request.Parent.Spec.Appname}
 
 	reg := &Registration{
@@ -97,6 +108,6 @@ func syncHandler(c *gin.Context) {
 		Spec:       *regspec,
 	}
 	response.Children = append(response.Children, *reg)
-	log.Trace(appuuid.String())
+	log.Trace(appuuid.ArdFullName)
 	c.JSON(http.StatusOK, response)
 }
