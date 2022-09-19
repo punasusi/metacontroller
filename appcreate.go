@@ -25,9 +25,8 @@ func CreateAzureADApp(client msgraphsdk.GraphServiceClient, app App) (App, error
 	newApp.SetOptionalClaims(&claim)
 	resources := get_resources(app)
 	newApp.SetRequiredResourceAccess(resources)
-	//TODO Add SPA
-	//TODO Add Web
-	//TODO Add Roles
+	app = setup_uris(app)
+	//TODO Add Roles when read from JSON
 
 	registeredapp, err := client.Applications().Post(context.Background(), newApp, nil)
 	if err != nil {
@@ -148,4 +147,15 @@ func get_resources(app App) []models.RequiredResourceAccessable {
 	}
 	return resources
 
+}
+
+func setup_uris(app App) App {
+	switch app.Kind {
+	case "API":
+		//TODO add homepage, logout, redirect url/i
+	case "APP":
+		//TODO add redirect uri
+	default:
+	}
+	return app
 }
