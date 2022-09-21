@@ -2,10 +2,9 @@ package main
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"os"
 
+	"github.com/google/uuid"
 	msgraphsdk "github.com/microsoftgraph/msgraph-sdk-go"
 	"github.com/microsoftgraph/msgraph-sdk-go/models"
 )
@@ -14,7 +13,7 @@ func CreateAzureADApp(client msgraphsdk.GraphServiceClient, app App) (App, error
 	newApp := models.NewApplication()
 	display_name := get_display_name(app)
 	newApp.SetDisplayName(&display_name)
-	newApp.SetIdentifierUris([]string{""})
+	// newApp.SetIdentifierUris([]string{""})
 	sign_in_audience := os.Getenv("SIGN_IN_AUDIENCE")
 	newApp.SetSignInAudience(&sign_in_audience)
 	is_fallback_public_client := true
@@ -30,9 +29,9 @@ func CreateAzureADApp(client msgraphsdk.GraphServiceClient, app App) (App, error
 
 	registeredapp, err := client.Applications().Post(context.Background(), newApp, nil)
 	if err != nil {
-		fmt.Printf("Error creating the app: %v\n", err)
-		fmt.Print(err)
-		return app, errors.New("error creating the app")
+		// fmt.Printf("Error creating the app: %v\n", err)
+		// fmt.Print(err)
+		return app, err
 	}
 	app.AppName = *registeredapp.GetAppId()
 	return app, nil
@@ -45,7 +44,8 @@ func compile_api(app App) models.ApiApplication {
 	var oauth_permission_enabled = true
 	var scopetype = "Admin"
 	var default_api_scope = os.Getenv("DEFAULT_API_SCOPE")
-	default_scope_uuid := get_display_name(app)
+	default_scope_uuid := uuid.New().String()
+	// default_scope_uuid := get_display_name(app)
 	// api oath scope
 	scope := models.NewPermissionScope()
 	scope.SetAdminConsentDescription(&admin_consent_description)
@@ -88,7 +88,7 @@ func get_display_name(app App) string {
 func get_claims(app App) models.OptionalClaims {
 	var tempfalsebool = false
 	var claim_sid_name = "sid"
-	var claim_groups_name = "sid"
+	var claim_groups_name = "groups"
 	var groupclaim []string
 	groupclaim = append(groupclaim, "netbios_domain_and_sam_account_name")
 
@@ -120,6 +120,7 @@ func get_resources(app App) []models.RequiredResourceAccessable {
 	var resource_access_type = os.Getenv("RESOURCE_ACCESS_TYPE")
 	var resource_access_id = os.Getenv("RESOURCE_ACCESS_ID")
 	// resources
+	resource_access_content = models.NewResourceAccess()
 	resource = models.NewRequiredResourceAccess()
 	resource.SetResourceAppId(&resource_app_id)
 	resource_access_content.SetType(&resource_access_type)
@@ -127,24 +128,24 @@ func get_resources(app App) []models.RequiredResourceAccessable {
 	resource_access = append(resource_access, resource_access_content)
 	resource.SetResourceAccess(resource_access)
 	resources = append(resources, resource)
-	for _, access := range app.RequiredResourceAccess {
-		//TODO read this from input json!
-		var delegated_resource_access []models.ResourceAccessable
-		var delegated_resource_access_content models.ResourceAccessable
-		var delegated_resource models.RequiredResourceAccessable
-		var delegated_resource_app_id = ""
-		var delegated_resource_access_type = ""
-		var delegated_resource_access_id = ""
-		// resources
-		delegated_resource = models.NewRequiredResourceAccess()
-		delegated_resource.SetResourceAppId(&delegated_resource_app_id)
-		delegated_resource_access_content.SetType(&delegated_resource_access_type)
-		delegated_resource_access_content.SetId(&delegated_resource_access_id)
-		delegated_resource_access = append(delegated_resource_access, resource_access_content)
-		delegated_resource.SetResourceAccess(delegated_resource_access)
-		fmt.Println(access)
-		resources = append(resources, delegated_resource)
-	}
+	// for _, access := range app.RequiredResourceAccess {
+	// 	//TODO read this from input json!
+	// 	var delegated_resource_access []models.ResourceAccessable
+	// 	var delegated_resource_access_content models.ResourceAccessable
+	// 	var delegated_resource models.RequiredResourceAccessable
+	// 	var delegated_resource_app_id = ""
+	// 	var delegated_resource_access_type = ""
+	// 	var delegated_resource_access_id = ""
+	// 	// resources
+	// 	delegated_resource = models.NewRequiredResourceAccess()
+	// 	delegated_resource.SetResourceAppId(&delegated_resource_app_id)
+	// 	delegated_resource_access_content.SetType(&delegated_resource_access_type)
+	// 	delegated_resource_access_content.SetId(&delegated_resource_access_id)
+	// 	delegated_resource_access = append(delegated_resource_access, resource_access_content)
+	// 	delegated_resource.SetResourceAccess(delegated_resource_access)
+	// 	fmt.Println(access)
+	// 	resources = append(resources, delegated_resource)
+	// }
 	return resources
 
 }
