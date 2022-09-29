@@ -16,3 +16,7 @@ spec:
     sync:
       webhook:
         url: http://metademo-controller.controllers:8080/sync
+    finalize:
+      webhook:
+        url: http://metademo-controller.controllers:8080/final
+

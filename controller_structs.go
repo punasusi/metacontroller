@@ -25,6 +25,8 @@ type ControllerStatus struct {
 type SyncResponse struct {
 	Status   ControllerStatus `json:"status"`
 	Children []Registration   `json:"children"`
+	Finalize bool             `json:"finalizing"`
+	Final    bool             `json:"finalized"`
 }
 type Registration struct {
 	APIVersion string               `json:"apiVersion"`

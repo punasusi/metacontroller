@@ -9,7 +9,6 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,7 +20,7 @@ func getEnv(key, fallback string) string {
 }
 
 func loglevel() log.Level {
-	switch getEnv("LOG_LEVEL", "info") {
+	switch getEnv("LOG_LEVEL", "trace") {
 	case "debug":
 		return log.DebugLevel
 	case "trace":
@@ -34,19 +33,22 @@ func loglevel() log.Level {
 
 func main() {
 	// load .env file
-	godotenv.Load(".env")
+	// godotenv.Load(".env")
 
 	// if err != nil {
 	// 	log.Fatalf("Error loading .env file")
 	// }
+	fmt.Println("Starting?")
 	log.SetLevel(loglevel())
+	log.Info("starting")
 	gin.DefaultWriter = log.New().Out
-	gin.SetMode(gin.ReleaseMode)
+	// gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.POST("/sync", syncHandler)
+	r.POST("/final", finalizerHandler)
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
-		port = "8088"
+		port = "8080"
 	}
 	r.Run(fmt.Sprintf(":%s", port))
 }
@@ -109,5 +111,11 @@ func syncHandler(c *gin.Context) {
 	}
 	response.Children = append(response.Children, *reg)
 	log.Trace(appuuid.ArdFullName)
+	c.JSON(http.StatusOK, response)
+}
+
+func finalizerHandler(c *gin.Context) {
+	response := &SyncResponse{}
+	response.Final = true
 	c.JSON(http.StatusOK, response)
 }
